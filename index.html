@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>EfikCoin Eternal – World Hub | Mine, Play, Bet</title>
+    <title>EfikCoin Eternal – Mine, Battle, Bet, Earn</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <style>
         body { background: radial-gradient(circle at 10% 30%, #0a0f1e, #03060f); font-family: 'Inter', sans-serif; transition: background 0.3s, color 0.3s; }
@@ -15,12 +14,17 @@
         body.light-theme .glass-card { background: rgba(255,255,255,0.7); border-color: #00c6fb; color: #1a1a2e; }
         .btn-primary { background: linear-gradient(135deg, #00c6fb, #005bea); transition: 0.2s; }
         .btn-primary:hover { transform: scale(1.02); }
-        .mine-btn { background: #f39c12; border: none; padding: 0.5rem 1rem; border-radius: 2rem; cursor: pointer; }
-        .dragon-btn { background: #e67e22; }
-        .odds-btn { background: #1a2a3a; border: 1px solid #00c6fb; border-radius: 1rem; padding: 0.5rem; text-align: center; cursor: pointer; }
+        .mine-btn { background: #f39c12; border: none; padding: 0.5rem 1rem; border-radius: 2rem; cursor: pointer; transition: 0.2s; }
+        .mine-btn:hover { transform: scale(1.02); background: #e67e22; }
+        .odds-btn { background: #1a2a3a; border: 1px solid #00c6fb; border-radius: 1rem; padding: 0.5rem; text-align: center; cursor: pointer; transition: 0.2s; }
         body.light-theme .odds-btn { background: #e2e8f0; border-color: #005bea; }
-        .match-card { background: rgba(0,0,0,0.5); border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; }
-        body.light-theme .match-card { background: rgba(0,0,0,0.1); }
+        .health-bar { background: #dc2626; height: 10px; border-radius: 5px; transition: width 0.3s; }
+        .dragon-img { font-size: 3rem; text-shadow: 0 0 10px #ff6600; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .withdraw-card { background: rgba(0,0,0,0.4); border-radius: 1rem; padding: 1rem; margin-top: 1rem; }
+        .level-badge { background: gold; color: black; padding: 0.2rem 0.5rem; border-radius: 2rem; font-size: 0.7rem; }
+        .social-icon { transition: transform 0.2s; }
+        .social-icon:hover { transform: scale(1.1); }
     </style>
 </head>
 <body>
@@ -44,11 +48,11 @@
 <div class="pt-20 p-4 max-w-7xl mx-auto">
     <!-- Welcome + Referral -->
     <div class="glass-card p-4 mb-6 flex flex-wrap justify-between items-center">
-        <div><i class="fas fa-globe text-cyan-400"></i> <span id="user-name">Guest</span> | <span id="referral-link" class="text-xs font-mono"></span></div>
-        <button id="copy-ref" class="bg-cyan-600/50 px-2 py-1 rounded text-xs">Copy Ref Link</button>
+        <div><i class="fas fa-globe text-cyan-400"></i> <span id="user-name">Explorer</span> | Level: <span id="user-level" class="level-badge">1</span> | Referrals: <span id="ref-count">0</span></div>
+        <div><span id="referral-link" class="text-xs font-mono"></span> <button id="copy-ref" class="bg-cyan-600/50 px-2 py-1 rounded text-xs ml-2">Copy Link</button></div>
     </div>
 
-    <!-- Mining Section (ECE, BTC, USDT) -->
+    <!-- Mining Section -->
     <div class="glass-card p-5 mb-6">
         <h2 class="text-2xl font-bold mb-3"><i class="fas fa-pickaxe"></i> Mining ⛏️</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -56,28 +60,28 @@
                 <i class="fas fa-infinity text-3xl text-cyan-400"></i>
                 <p class="font-bold">ECE Mining</p>
                 <p id="ece-mined" class="text-2xl">0.00</p>
-                <button id="mine-ece" class="mine-btn w-full mt-2">Mine 1 ECE</button>
-                <p class="text-xs mt-1">Power: <span id="ece-power">1</span> ECE/click</p>
-                <button id="upgrade-ece" class="bg-green-600/70 text-xs px-2 py-1 rounded mt-1">Upgrade (+1) - Cost 10 ECE</button>
+                <button id="mine-ece" class="mine-btn w-full mt-2">Mine +<span id="ece-power-val">1</span> ECE</button>
+                <p class="text-xs mt-1">Power Level: <span id="ece-level">1</span></p>
+                <button id="upgrade-ece" class="bg-green-600/70 text-xs px-2 py-1 rounded mt-1">Upgrade (+1 power) - Cost 10 ECE</button>
             </div>
             <div class="text-center p-3 bg-black/30 rounded-2xl">
                 <i class="fab fa-bitcoin text-3xl text-yellow-400"></i>
                 <p class="font-bold">BTC Mining</p>
                 <p id="btc-mined" class="text-2xl">0.00000000</p>
-                <button id="mine-btc" class="mine-btn w-full mt-2">Mine 0.0001 BTC</button>
-                <p class="text-xs mt-1">Power: <span id="btc-power">1</span>x</p>
+                <button id="mine-btc" class="mine-btn w-full mt-2">Mine +0.0001 BTC</button>
+                <p class="text-xs mt-1">Power Level: <span id="btc-level">1</span></p>
                 <button id="upgrade-btc" class="bg-green-600/70 text-xs px-2 py-1 rounded mt-1">Upgrade - Cost 0.001 BTC</button>
             </div>
             <div class="text-center p-3 bg-black/30 rounded-2xl">
                 <i class="fas fa-dollar-sign text-3xl text-green-400"></i>
                 <p class="font-bold">USDT Mining</p>
                 <p id="usdt-mined" class="text-2xl">0.00</p>
-                <button id="mine-usdt" class="mine-btn w-full mt-2">Mine 1 USDT</button>
-                <p class="text-xs mt-1">Power: <span id="usdt-power">1</span> USDT/click</p>
-                <button id="upgrade-usdt" class="bg-green-600/70 text-xs px-2 py-1 rounded mt-1">Upgrade (+1) - Cost 10 USDT</button>
+                <button id="mine-usdt" class="mine-btn w-full mt-2">Mine +1 USDT</button>
+                <p class="text-xs mt-1">Power Level: <span id="usdt-level">1</span></p>
+                <button id="upgrade-usdt" class="bg-green-600/70 text-xs px-2 py-1 rounded mt-1">Upgrade (+1 power) - Cost 10 USDT</button>
             </div>
         </div>
-        <p class="text-xs text-center mt-3 text-gray-400">*Mining is simulated for fun & rewards. Future real mining will be integrated with blockchain.</p>
+        <div class="text-center mt-3 text-xs text-gray-400">*Withdrawals allowed only when Mining Level >= 10 (for each coin). Referral bonus: 10% of friend's mined coins.</div>
     </div>
 
     <!-- Dragon Lord Game -->
@@ -85,22 +89,25 @@
         <h2 class="text-2xl font-bold mb-3"><i class="fas fa-dragon"></i> Dragon Lord Game 🐉</h2>
         <div class="flex flex-wrap gap-4">
             <div class="flex-1 text-center">
-                <p>Your HP: <span id="player-hp">100</span> | Dragon HP: <span id="dragon-hp">80</span></p>
-                <button id="attack-dragon" class="bg-red-600 px-4 py-2 rounded-full mt-2">⚔️ Attack</button>
-                <button id="heal-player" class="bg-green-600 px-4 py-2 rounded-full mt-2">❤️ Heal (Cost 5 ECE)</button>
-                <div id="dragon-log" class="h-32 overflow-auto text-xs bg-black/30 p-2 rounded mt-2"></div>
+                <div class="dragon-img"><i class="fas fa-dragon"></i> <span id="dragon-name">Fire Dragon</span></div>
+                <div class="w-full bg-gray-700 rounded-full h-2 mt-2"><div id="dragon-hp-bar" class="health-bar" style="width:100%"></div></div>
+                <p>Dragon HP: <span id="dragon-hp">80</span></p>
+                <div class="mt-4"><i class="fas fa-user-ninja text-3xl"></i> <span id="player-name">You</span></div>
+                <div class="w-full bg-gray-700 rounded-full h-2 mt-2"><div id="player-hp-bar" class="health-bar" style="width:100%"></div></div>
+                <p>Your HP: <span id="player-hp">100</span></p>
+                <div class="flex gap-2 justify-center mt-3">
+                    <button id="attack-dragon" class="bg-red-600 px-4 py-2 rounded-full"><i class="fas fa-fist-raised"></i> Attack</button>
+                    <button id="heal-player" class="bg-green-600 px-4 py-2 rounded-full"><i class="fas fa-heart"></i> Heal (5 ECE)</button>
+                </div>
+                <div id="dragon-log" class="h-32 overflow-auto text-xs bg-black/30 p-2 rounded mt-2 text-left"></div>
+                <p class="text-sm mt-2">Dragons Slain: <span id="dragons-slain">0</span> | Bonus: +50 ECE per kill</p>
             </div>
         </div>
     </div>
 
-    <!-- Sports Betting + Theme/Country Options -->
+    <!-- Sports Betting -->
     <div class="glass-card p-5 mb-6">
         <h2 class="text-2xl font-bold mb-3"><i class="fas fa-futbol"></i> Sports Betting ⚽</h2>
-        <div class="flex flex-wrap gap-4 mb-4">
-            <div><label class="text-sm">Theme:</label><select id="sport-theme" class="bg-black/50 p-1 rounded"><option value="dark">Dark</option><option value="light">Light</option></select></div>
-            <div><label class="text-sm">Country:</label><select id="country-select" class="bg-black/50 p-1 rounded"><option value="Global">Global</option><option value="UK">UK</option><option value="USA">USA</option><option value="Nigeria">Nigeria</option><option value="Spain">Spain</option></select></div>
-        </div>
-        <!-- Live Match Simulator -->
         <div class="pitch bg-green-800/50 rounded-xl p-3 text-center">
             <div class="flex justify-between text-2xl font-bold">
                 <span id="home-team">Manchester Utd</span>
@@ -122,93 +129,134 @@
         </div>
     </div>
 
-    <!-- Leaderboard / Stats (optional) -->
+    <!-- Withdrawal Section -->
+    <div class="glass-card p-5 mb-6">
+        <h2 class="text-2xl font-bold mb-3"><i class="fas fa-money-bill-wave"></i> Withdrawal Requests</h2>
+        <div class="withdraw-card">
+            <p class="text-sm mb-2">Withdraw mined coins (ECE, BTC, USDT). Requires mining level ≥10 for each coin.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div><label class="text-xs">Coin</label><select id="withdraw-coin" class="bg-black/50 p-1 rounded w-full"><option value="ECE">ECE</option><option value="BTC">BTC</option><option value="USDT">USDT</option></select></div>
+                <div><label class="text-xs">Amount</label><input type="number" id="withdraw-amount" class="bg-black/50 p-1 rounded w-full" placeholder="Amount"></div>
+                <div><label class="text-xs">Wallet Address</label><input type="text" id="withdraw-address" class="bg-black/50 p-1 rounded w-full" placeholder="0x... or BTC address"></div>
+            </div>
+            <button id="request-withdraw" class="btn-primary w-full mt-3 py-2 rounded">Request Withdrawal</button>
+            <div id="withdraw-status" class="text-xs mt-2"></div>
+            <div class="mt-3 text-xs text-gray-400">Requests saved locally. Admin will review and approve manually.</div>
+        </div>
+        <div class="mt-4">
+            <h3 class="font-bold">Pending Withdrawals (Admin view)</h3>
+            <div id="withdrawal-list" class="text-xs max-h-32 overflow-auto bg-black/30 p-2 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Global Stats -->
     <div class="glass-card p-4 text-center text-sm">
-        <p>🌍 Global Community Mining Total: <span id="global-mined">0</span> ECE | 🐉 Dragons Slain: <span id="dragons-slain">0</span></p>
+        <p>🌍 Global Community: <span id="global-mined">0</span> ECE mined | 🐉 Dragons Slain: <span id="global-dragons">0</span> | 👥 Referrals: <span id="global-refs">0</span></p>
+    </div>
+
+    <!-- Social Links Footer -->
+    <div class="glass-card p-4 mt-6 flex flex-wrap justify-center gap-6">
+        <a href="https://t.me/efikcoinofficialecosystem" target="_blank" class="social-icon text-2xl text-cyan-400"><i class="fab fa-telegram"></i></a>
+        <a href="https://discord.gg/Ub4vvudcV" target="_blank" class="social-icon text-2xl text-indigo-400"><i class="fab fa-discord"></i></a>
+        <a href="https://twitter.com/efikcoinstakin" target="_blank" class="social-icon text-2xl text-blue-400"><i class="fab fa-twitter"></i></a>
+        <a href="https://www.facebook.com/profile.php?id=61573960395647" target="_blank" class="social-icon text-2xl text-blue-600"><i class="fab fa-facebook"></i></a>
+        <a href="mailto:efikcoineternal@gmail.com" class="social-icon text-2xl text-red-400"><i class="fas fa-envelope"></i></a>
     </div>
 </div>
 
 <script>
-    // ---------- GLOBAL STATE (localStorage) ----------
+    // ========== GLOBAL STATE ==========
     let eceMined = parseFloat(localStorage.getItem("eceMined") || "0");
     let btcMined = parseFloat(localStorage.getItem("btcMined") || "0");
     let usdtMined = parseFloat(localStorage.getItem("usdtMined") || "0");
-    let ecePower = parseInt(localStorage.getItem("ecePower") || "1");
-    let btcPower = parseInt(localStorage.getItem("btcPower") || "1");
-    let usdtPower = parseInt(localStorage.getItem("usdtPower") || "1");
+    let eceLevel = parseInt(localStorage.getItem("eceLevel") || "1");
+    let btcLevel = parseInt(localStorage.getItem("btcLevel") || "1");
+    let usdtLevel = parseInt(localStorage.getItem("usdtLevel") || "1");
     let playerHP = parseInt(localStorage.getItem("playerHP") || "100");
     let dragonHP = parseInt(localStorage.getItem("dragonHP") || "80");
     let dragonsSlain = parseInt(localStorage.getItem("dragonsSlain") || "0");
     let globalMined = parseInt(localStorage.getItem("globalMined") || "0");
+    let globalDragons = parseInt(localStorage.getItem("globalDragons") || "0");
+    let referralsCount = parseInt(localStorage.getItem("referralsCount") || "0");
+    let withdrawalRequests = JSON.parse(localStorage.getItem("withdrawalRequests") || "[]");
     
-    // Sports betting variables
-    let matchActive = true;
-    let matchMinute = 0;
-    let homeScore = 0, awayScore = 0;
-    let matchInterval = null;
-    let currentBet = null; // { outcome, amount }
+    // User ID and referral
+    let userId = localStorage.getItem("userId");
+    if(!userId) { userId = "user_" + Math.random().toString(36).substr(2, 8); localStorage.setItem("userId", userId); }
+    let referredBy = localStorage.getItem("referred_by") || null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get("ref");
+    if(ref && ref !== userId && !referredBy) {
+        localStorage.setItem("referred_by", ref);
+        eceMined += 10;
+        localStorage.setItem("eceMined", eceMined);
+        alert(`Welcome! You were referred by ${ref}. You get 10 ECE bonus!`);
+        let referrerBonus = JSON.parse(localStorage.getItem("referrer_bonus") || "{}");
+        referrerBonus[ref] = (referrerBonus[ref] || 0) + 10;
+        localStorage.setItem("referrer_bonus", JSON.stringify(referrerBonus));
+    }
     
-    // Helper UI updates
     function updateUI() {
         document.getElementById("ece-mined").innerText = eceMined.toFixed(2);
         document.getElementById("btc-mined").innerText = btcMined.toFixed(8);
         document.getElementById("usdt-mined").innerText = usdtMined.toFixed(2);
-        document.getElementById("ece-power").innerText = ecePower;
-        document.getElementById("btc-power").innerText = btcPower;
-        document.getElementById("usdt-power").innerText = usdtPower;
+        document.getElementById("ece-level").innerText = eceLevel;
+        document.getElementById("btc-level").innerText = btcLevel;
+        document.getElementById("usdt-level").innerText = usdtLevel;
+        document.getElementById("ece-power-val").innerText = eceLevel;
         document.getElementById("player-hp").innerText = playerHP;
         document.getElementById("dragon-hp").innerText = dragonHP;
+        document.getElementById("player-hp-bar").style.width = (playerHP/100)*100 + "%";
+        document.getElementById("dragon-hp-bar").style.width = (dragonHP/100)*100 + "%";
         document.getElementById("dragons-slain").innerText = dragonsSlain;
         document.getElementById("global-mined").innerText = globalMined;
+        document.getElementById("global-dragons").innerText = globalDragons;
+        document.getElementById("ref-count").innerText = referralsCount;
+        document.getElementById("user-level").innerText = Math.max(eceLevel, btcLevel, usdtLevel);
+        
         localStorage.setItem("eceMined", eceMined);
         localStorage.setItem("btcMined", btcMined);
         localStorage.setItem("usdtMined", usdtMined);
-        localStorage.setItem("ecePower", ecePower);
-        localStorage.setItem("btcPower", btcPower);
-        localStorage.setItem("usdtPower", usdtPower);
+        localStorage.setItem("eceLevel", eceLevel);
+        localStorage.setItem("btcLevel", btcLevel);
+        localStorage.setItem("usdtLevel", usdtLevel);
         localStorage.setItem("playerHP", playerHP);
         localStorage.setItem("dragonHP", dragonHP);
         localStorage.setItem("dragonsSlain", dragonsSlain);
         localStorage.setItem("globalMined", globalMined);
+        localStorage.setItem("globalDragons", globalDragons);
+        localStorage.setItem("referralsCount", referralsCount);
+        localStorage.setItem("withdrawalRequests", JSON.stringify(withdrawalRequests));
     }
     
-    // Mining actions
-    document.getElementById("mine-ece").onclick = () => {
-        eceMined += ecePower;
-        globalMined += ecePower;
+    function addMined(coin, amount) {
+        if(coin === "ECE") { eceMined += amount; globalMined += amount; }
+        if(coin === "BTC") { btcMined += amount; }
+        if(coin === "USDT") { usdtMined += amount; globalMined += amount; }
+        if(referredBy) {
+            let bonus = amount * 0.1;
+            let referrerBonus = JSON.parse(localStorage.getItem("referrer_bonus") || "{}");
+            referrerBonus[referredBy] = (referrerBonus[referredBy] || 0) + bonus;
+            localStorage.setItem("referrer_bonus", JSON.stringify(referrerBonus));
+        }
         updateUI();
-    };
-    document.getElementById("mine-btc").onclick = () => {
-        let gain = 0.0001 * btcPower;
-        btcMined += gain;
-        updateUI();
-    };
-    document.getElementById("mine-usdt").onclick = () => {
-        usdtMined += usdtPower;
-        globalMined += usdtPower;
-        updateUI();
-    };
+    }
+    
+    document.getElementById("mine-ece").onclick = () => addMined("ECE", eceLevel);
+    document.getElementById("mine-btc").onclick = () => addMined("BTC", 0.0001 * btcLevel);
+    document.getElementById("mine-usdt").onclick = () => addMined("USDT", usdtLevel);
+    
     document.getElementById("upgrade-ece").onclick = () => {
-        if(eceMined >= 10) {
-            eceMined -= 10;
-            ecePower++;
-            updateUI();
-        } else alert("Need 10 ECE");
+        if(eceMined >= 10) { eceMined -= 10; eceLevel++; updateUI(); }
+        else alert("Need 10 ECE");
     };
     document.getElementById("upgrade-btc").onclick = () => {
-        let cost = 0.001;
-        if(btcMined >= cost) {
-            btcMined -= cost;
-            btcPower++;
-            updateUI();
-        } else alert("Need 0.001 BTC");
+        if(btcMined >= 0.001) { btcMined -= 0.001; btcLevel++; updateUI(); }
+        else alert("Need 0.001 BTC");
     };
     document.getElementById("upgrade-usdt").onclick = () => {
-        if(usdtMined >= 10) {
-            usdtMined -= 10;
-            usdtPower++;
-            updateUI();
-        } else alert("Need 10 USDT");
+        if(usdtMined >= 10) { usdtMined -= 10; usdtLevel++; updateUI(); }
+        else alert("Need 10 USDT");
     };
     
     // Dragon game
@@ -221,24 +269,30 @@
         if(log.children.length > 20) log.removeChild(log.children[0]);
     }
     document.getElementById("attack-dragon").onclick = () => {
-        if(playerHP <= 0) { addDragonLog("You are dead! Heal or reset."); return; }
-        if(dragonHP <= 0) { addDragonLog("Dragon already dead. A new dragon appears!"); dragonHP = 80 + Math.floor(Math.random() * 50); updateUI(); addDragonLog("New dragon with " + dragonHP + " HP appears!"); return; }
-        let playerDamage = Math.floor(Math.random() * 20) + 10;
-        let dragonDamage = Math.floor(Math.random() * 15) + 5;
+        if(playerHP <= 0) { addDragonLog("You are dead! Heal to revive."); return; }
+        if(dragonHP <= 0) {
+            addDragonLog("Dragon already dead! A new dragon appears!");
+            dragonHP = 80 + Math.floor(Math.random() * 50);
+            updateUI();
+            return;
+        }
+        let playerDamage = Math.floor(Math.random() * 25) + 10;
+        let dragonDamage = Math.floor(Math.random() * 20) + 5;
         dragonHP -= playerDamage;
         playerHP -= dragonDamage;
-        addDragonLog(`You hit for ${playerDamage}! Dragon hits back for ${dragonDamage}.`);
+        addDragonLog(`⚔️ You hit for ${playerDamage}! Dragon hits back for ${dragonDamage}.`);
         if(dragonHP <= 0) {
             addDragonLog("🎉 You slayed the dragon! +50 ECE reward!");
             eceMined += 50;
             dragonsSlain++;
+            globalDragons++;
             dragonHP = 80 + Math.floor(Math.random() * 50);
             playerHP = Math.min(playerHP + 30, 100);
             updateUI();
-            addDragonLog(`New dragon appears! HP: ${dragonHP}`);
+            addDragonLog(`New dragon appears with ${dragonHP} HP!`);
         }
         if(playerHP <= 0) {
-            addDragonLog("💀 You died! Use Heal to revive.");
+            addDragonLog("💀 You died! Use Heal to revive (cost 5 ECE).");
             playerHP = 0;
         }
         updateUI();
@@ -248,17 +302,19 @@
             eceMined -= 5;
             playerHP = Math.min(playerHP + 40, 100);
             updateUI();
-            addDragonLog("You healed 40 HP!");
+            addDragonLog("❤️ You healed 40 HP!");
         } else if(playerHP >= 100) alert("Already full HP");
         else alert("Need 5 ECE to heal");
     };
     
-    // Sports betting simulation (live match)
+    // Sports betting simulation
+    let matchActive = true;
+    let matchMinute = 0, homeScore = 0, awayScore = 0;
+    let matchInterval = null;
+    let currentBet = null;
     function startMatchSimulation() {
         if(matchInterval) clearInterval(matchInterval);
-        matchMinute = 0;
-        homeScore = 0;
-        awayScore = 0;
+        matchMinute = 0; homeScore = 0; awayScore = 0;
         document.getElementById("match-score").innerText = "0 - 0";
         document.getElementById("match-time").innerText = "0:00";
         const commentaryDiv = document.getElementById("sport-commentary");
@@ -269,13 +325,8 @@
             document.getElementById("match-time").innerText = `${Math.floor(matchMinute/2)}:${(matchMinute%2)*30}`;
             if(Math.random() < 0.12) {
                 let scoring = Math.random() < 0.5 ? "home" : "away";
-                if(scoring === "home") {
-                    homeScore++;
-                    addSportCommentary(`⚽ GOAL! Manchester Utd scores! (${homeScore} - ${awayScore})`);
-                } else {
-                    awayScore++;
-                    addSportCommentary(`⚽ GOAL! Liverpool scores! (${homeScore} - ${awayScore})`);
-                }
+                if(scoring === "home") { homeScore++; addSportCommentary(`⚽ GOAL! Manchester Utd scores! (${homeScore} - ${awayScore})`); }
+                else { awayScore++; addSportCommentary(`⚽ GOAL! Liverpool scores! (${homeScore} - ${awayScore})`); }
                 document.getElementById("match-score").innerText = `${homeScore} - ${awayScore}`;
             }
             if(matchMinute >= 90) {
@@ -293,7 +344,6 @@
                     document.getElementById("sport-bet-status").innerHTML = `<span class="text-red-400">You lost. Better luck next match!</span>`;
                 }
                 currentBet = null;
-                // auto restart match after 10 seconds
                 setTimeout(() => { matchActive = true; startMatchSimulation(); }, 10000);
                 addSportCommentary("New match will start in 10 seconds...");
             }
@@ -307,20 +357,17 @@
         box.scrollTop = box.scrollHeight;
         if(box.children.length > 15) box.removeChild(box.children[0]);
     }
-    
-    // Place bet (uses ECE from mining)
     document.getElementById("place-sport-bet").onclick = () => {
         if(!matchActive) { alert("Match not active, wait for next match."); return; }
         let amount = parseFloat(document.getElementById("bet-amount-sport").value);
         if(isNaN(amount) || amount <= 0) { alert("Enter valid amount"); return; }
         let outcome = null;
-        let odds = 0;
         if(document.activeElement && document.activeElement.id === "bet-home") outcome = "home";
         else if(document.activeElement && document.activeElement.id === "bet-draw") outcome = "draw";
         else if(document.activeElement && document.activeElement.id === "bet-away") outcome = "away";
         else { alert("Click on Home, Draw, or Away button first"); return; }
-        odds = outcome === "home" ? 2.5 : (outcome === "draw" ? 3.2 : 2.8);
-        if(amount > eceMined) { alert("Insufficient ECE balance. Mine more!"); return; }
+        let odds = outcome === "home" ? 2.5 : (outcome === "draw" ? 3.2 : 2.8);
+        if(amount > eceMined) { alert("Insufficient ECE. Mine more!"); return; }
         eceMined -= amount;
         currentBet = { outcome, amount, odds };
         updateUI();
@@ -330,52 +377,63 @@
     document.getElementById("bet-home").onclick = () => { document.getElementById("place-sport-bet").click(); };
     document.getElementById("bet-draw").onclick = () => { document.getElementById("place-sport-bet").click(); };
     document.getElementById("bet-away").onclick = () => { document.getElementById("place-sport-bet").click(); };
+    startMatchSimulation();
     
-    // Theme switcher (light/dark)
+    // Withdrawal request (level >= 10)
+    document.getElementById("request-withdraw").onclick = () => {
+        let coin = document.getElementById("withdraw-coin").value;
+        let amount = parseFloat(document.getElementById("withdraw-amount").value);
+        let address = document.getElementById("withdraw-address").value.trim();
+        if(isNaN(amount) || amount <= 0) { alert("Enter valid amount"); return; }
+        if(!address) { alert("Enter wallet address"); return; }
+        let level = coin === "ECE" ? eceLevel : (coin === "BTC" ? btcLevel : usdtLevel);
+        let balance = coin === "ECE" ? eceMined : (coin === "BTC" ? btcMined : usdtMined);
+        if(level < 10) { alert(`Withdrawal requires ${coin} mining level >=10. Current level: ${level}`); return; }
+        if(amount > balance) { alert(`Insufficient ${coin} balance.`); return; }
+        if(coin === "ECE") eceMined -= amount;
+        if(coin === "BTC") btcMined -= amount;
+        if(coin === "USDT") usdtMined -= amount;
+        withdrawalRequests.push({ userId, coin, amount, address, status: "pending", date: new Date().toISOString() });
+        localStorage.setItem("withdrawalRequests", JSON.stringify(withdrawalRequests));
+        updateUI();
+        document.getElementById("withdraw-status").innerHTML = "✅ Withdrawal request submitted. Admin will review and send funds.";
+        setTimeout(() => document.getElementById("withdraw-status").innerHTML = "", 3000);
+        renderWithdrawalList();
+    };
+    function renderWithdrawalList() {
+        const container = document.getElementById("withdrawal-list");
+        if(!container) return;
+        if(withdrawalRequests.length === 0) { container.innerHTML = "No pending withdrawals."; return; }
+        let html = "<table class='w-full text-left'><tr><th>User</th><th>Coin</th><th>Amount</th><th>Address</th><th>Status</th></tr>";
+        withdrawalRequests.forEach(req => {
+            html += `<tr><td class='text-xs'>${req.userId.slice(0,8)}</td><td>${req.coin}</td><td>${req.amount}</td><td>${req.address.slice(0,10)}...</td><td>${req.status}</td></tr>`;
+        });
+        html += "</table>";
+        container.innerHTML = html;
+    }
+    renderWithdrawalList();
+    
+    // Theme toggle
     document.getElementById("theme-toggle").onclick = () => {
         document.body.classList.toggle("light-theme");
     };
-    // Country selector (just UI placeholder)
-    document.getElementById("country-select").onchange = (e) => {
-        addSportCommentary(`🌍 Country changed to ${e.target.value}. Localized sports coming soon!`);
-    };
-    // Theme selector for sports
-    document.getElementById("sport-theme").onchange = (e) => {
-        addSportCommentary(`🎨 Sports theme set to ${e.target.value}`);
-    };
     
-    // Referral link generation (using wallet address if available, else guest ID)
-    let userId = localStorage.getItem("userId");
-    if(!userId) { userId = "guest_" + Math.random().toString(36).substr(2, 8); localStorage.setItem("userId", userId); }
+    // Referral link
     let refLink = `${window.location.origin}${window.location.pathname}?ref=${userId}`;
     document.getElementById("referral-link").innerText = refLink;
     document.getElementById("copy-ref").onclick = () => { navigator.clipboard.writeText(refLink); alert("Referral link copied!"); };
-    // If URL has ref param, simulate referral reward
-    const urlParams = new URLSearchParams(window.location.search);
-    const ref = urlParams.get("ref");
-    if(ref && ref !== userId) {
-        alert(`Welcome! You were referred by ${ref}. You both get 10 ECE bonus!`);
-        eceMined += 10;
-        updateUI();
-        // track referral (simplified)
-        localStorage.setItem("referred_by", ref);
-    }
     
-    // Start sports match
-    startMatchSimulation();
-    updateUI();
+    // Telegram user name if available
+    if(window.Telegram?.WebApp?.initDataUnsafe?.user) {
+        document.getElementById("user-name").innerText = window.Telegram.WebApp.initDataUnsafe.user.first_name;
+    }
     
     // Google Translate
     window.googleTranslateElementInit = () => {
         new google.translate.TranslateElement({ pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE }, 'google_translate_element');
     };
     
-    // Set user name from Telegram if available (optional)
-    if(window.Telegram?.WebApp?.initDataUnsafe?.user) {
-        document.getElementById("user-name").innerText = window.Telegram.WebApp.initDataUnsafe.user.first_name;
-    } else {
-        document.getElementById("user-name").innerText = "Explorer";
-    }
+    updateUI();
 </script>
 </body>
 </html>
