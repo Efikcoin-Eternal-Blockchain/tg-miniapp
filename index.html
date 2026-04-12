@@ -1,338 +1,381 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta property="og:title" content="EfikCoin Eternal Mini App" />
-<meta property="og:description" content="Play the live sports game, manage your ECE wallet, and win crypto prizes directly inside Telegram!" />
-<meta property="og:image" content="https://raw.githubusercontent.com/Efikcoinofficialecosystem/efikcoin-eternal/main/1772019882787.png" />
-<meta property="og:url" content="https://efikcoin-eternal-blockchain.github.io/tg-miniapp/" />
-<meta property="og:type" content="website" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>EfikCoin Eternal – Telegram Mini App</title>
-    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <title>EfikCoin Eternal – World Hub | Mine, Play, Bet</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    <!-- WalletConnect v2 standalone (works inside WebView) -->
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/modal@2.6.2/dist/index.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.11.0/dist/index.min.js"></script>
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <style>
-        body { background: radial-gradient(circle at 10% 30%, #0a0f1e, #03060f); color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 16px; }
-        .glass-card { background: rgba(15, 25, 45, 0.7); backdrop-filter: blur(14px); border: 1px solid rgba(0, 255, 255, 0.25); border-radius: 2rem; padding: 1rem; margin-bottom: 1rem; }
-        .btn-primary { background: linear-gradient(135deg, #00c6fb, #005bea); border: none; padding: 0.5rem 1rem; border-radius: 2rem; font-weight: bold; cursor: pointer; }
-        .odds-btn { background: #1a2a3a; border: 1px solid #00c6fb; border-radius: 1rem; padding: 0.5rem; text-align: center; cursor: pointer; flex: 1; margin: 0 2px; }
-        .odds-btn:hover { background: #00c6fb20; }
-        .pitch { background: #2e7d32; border-radius: 1rem; padding: 1rem; min-height: 200px; }
-        .commentary { height: 100px; overflow-y: auto; font-size: 11px; background: rgba(0,0,0,0.5); border-radius: 0.5rem; padding: 0.5rem; margin-top: 0.5rem; }
-        .wallet-option { background: rgba(255,255,255,0.1); border-radius: 1rem; padding: 0.75rem; margin: 0.5rem 0; cursor: pointer; text-align: center; }
-        .wallet-option:hover { background: rgba(0,198,251,0.3); }
+        body { background: radial-gradient(circle at 10% 30%, #0a0f1e, #03060f); font-family: 'Inter', sans-serif; transition: background 0.3s, color 0.3s; }
+        body.light-theme { background: #f0f2f5; color: #1a1a2e; }
+        .glass-card { background: rgba(15, 25, 45, 0.7); backdrop-filter: blur(14px); border: 1px solid rgba(0, 255, 255, 0.25); border-radius: 2rem; transition: all 0.3s; }
+        body.light-theme .glass-card { background: rgba(255,255,255,0.7); border-color: #00c6fb; color: #1a1a2e; }
+        .btn-primary { background: linear-gradient(135deg, #00c6fb, #005bea); transition: 0.2s; }
+        .btn-primary:hover { transform: scale(1.02); }
+        .mine-btn { background: #f39c12; border: none; padding: 0.5rem 1rem; border-radius: 2rem; cursor: pointer; }
+        .dragon-btn { background: #e67e22; }
+        .odds-btn { background: #1a2a3a; border: 1px solid #00c6fb; border-radius: 1rem; padding: 0.5rem; text-align: center; cursor: pointer; }
+        body.light-theme .odds-btn { background: #e2e8f0; border-color: #005bea; }
+        .match-card { background: rgba(0,0,0,0.5); border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; }
+        body.light-theme .match-card { background: rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
-<div id="loading" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
-    <div class="bg-gray-900 p-4 rounded-2xl"><i class="fas fa-spinner fa-spin"></i> Processing...</div>
+<div id="loading-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-gray-900 p-6 rounded-2xl"><i class="fas fa-spinner fa-spin"></i> Processing...</div>
 </div>
 
-<!-- Header -->
-<div class="flex justify-between items-center mb-4">
+<!-- Top Bar -->
+<div class="fixed top-0 left-0 right-0 z-40 flex justify-between items-center p-3 bg-black/50 backdrop-blur-md border-b border-white/10">
     <div class="flex items-center gap-2">
-        <img src="https://raw.githubusercontent.com/Efikcoinofficialecosystem/efikcoin-eternal/main/1772019882787.png" class="w-10 h-10 rounded-full">
-        <span class="font-bold text-cyan-300">EfikCoin Mini App</span>
+        <img src="https://raw.githubusercontent.com/Efikcoinofficialecosystem/efikcoin-eternal/main/1772019882787.png" class="w-8 h-8 rounded-full">
+        <span class="font-bold text-cyan-300">EfikCoin Eternal World Hub</span>
     </div>
-    <div id="telegram-user" class="text-xs bg-black/40 px-2 py-1 rounded-full"></div>
+    <div class="flex gap-2">
+        <button id="theme-toggle" class="bg-gray-700 px-2 py-1 rounded-full text-xs"><i class="fas fa-moon"></i> Theme</button>
+        <div id="google_translate_element" class="text-sm"></div>
+    </div>
 </div>
 
-<!-- Wallet Status -->
-<div class="glass-card">
-    <div class="flex justify-between items-center flex-wrap gap-2">
-        <div><p class="text-gray-400 text-xs">Wallet</p><p id="wallet-address" class="font-mono text-sm">Not connected</p></div>
-        <div><p class="text-gray-400 text-xs">ECE Balance</p><p id="ece-balance" class="text-xl font-bold">0.00</p></div>
-        <button id="connect-wallet-btn" class="bg-purple-600/70 px-3 py-1 rounded-full text-sm"><i class="fas fa-plug"></i> Connect</button>
+<div class="pt-20 p-4 max-w-7xl mx-auto">
+    <!-- Welcome + Referral -->
+    <div class="glass-card p-4 mb-6 flex flex-wrap justify-between items-center">
+        <div><i class="fas fa-globe text-cyan-400"></i> <span id="user-name">Guest</span> | <span id="referral-link" class="text-xs font-mono"></span></div>
+        <button id="copy-ref" class="bg-cyan-600/50 px-2 py-1 rounded text-xs">Copy Ref Link</button>
     </div>
-    <div id="conn-error" class="text-red-400 text-xs mt-1 hidden"></div>
-</div>
 
-<!-- Live Match -->
-<div class="glass-card">
-    <div class="flex justify-between items-center mb-2">
-        <h2 class="text-xl font-bold">⚽ LIVE MATCH</h2>
-        <span id="match-status" class="bg-green-600/50 px-2 py-0.5 rounded-full text-xs">LIVE 🔴</span>
-    </div>
-    <div class="pitch text-center">
-        <div class="flex justify-between text-2xl font-bold mb-2">
-            <span id="home-team">Manchester Utd</span>
-            <span id="score">0 - 0</span>
-            <span id="away-team">Liverpool</span>
+    <!-- Mining Section (ECE, BTC, USDT) -->
+    <div class="glass-card p-5 mb-6">
+        <h2 class="text-2xl font-bold mb-3"><i class="fas fa-pickaxe"></i> Mining ⛏️</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="text-center p-3 bg-black/30 rounded-2xl">
+                <i class="fas fa-infinity text-3xl text-cyan-400"></i>
+                <p class="font-bold">ECE Mining</p>
+                <p id="ece-mined" class="text-2xl">0.00</p>
+                <button id="mine-ece" class="mine-btn w-full mt-2">Mine 1 ECE</button>
+                <p class="text-xs mt-1">Power: <span id="ece-power">1</span> ECE/click</p>
+                <button id="upgrade-ece" class="bg-green-600/70 text-xs px-2 py-1 rounded mt-1">Upgrade (+1) - Cost 10 ECE</button>
+            </div>
+            <div class="text-center p-3 bg-black/30 rounded-2xl">
+                <i class="fab fa-bitcoin text-3xl text-yellow-400"></i>
+                <p class="font-bold">BTC Mining</p>
+                <p id="btc-mined" class="text-2xl">0.00000000</p>
+                <button id="mine-btc" class="mine-btn w-full mt-2">Mine 0.0001 BTC</button>
+                <p class="text-xs mt-1">Power: <span id="btc-power">1</span>x</p>
+                <button id="upgrade-btc" class="bg-green-600/70 text-xs px-2 py-1 rounded mt-1">Upgrade - Cost 0.001 BTC</button>
+            </div>
+            <div class="text-center p-3 bg-black/30 rounded-2xl">
+                <i class="fas fa-dollar-sign text-3xl text-green-400"></i>
+                <p class="font-bold">USDT Mining</p>
+                <p id="usdt-mined" class="text-2xl">0.00</p>
+                <button id="mine-usdt" class="mine-btn w-full mt-2">Mine 1 USDT</button>
+                <p class="text-xs mt-1">Power: <span id="usdt-power">1</span> USDT/click</p>
+                <button id="upgrade-usdt" class="bg-green-600/70 text-xs px-2 py-1 rounded mt-1">Upgrade (+1) - Cost 10 USDT</button>
+            </div>
         </div>
-        <div class="text-sm">⏱️ <span id="time">0:00</span></div>
-        <div id="commentary" class="commentary"><p>⚽ Match is live! Place your bet before it ends.</p></div>
+        <p class="text-xs text-center mt-3 text-gray-400">*Mining is simulated for fun & rewards. Future real mining will be integrated with blockchain.</p>
     </div>
-    <div class="flex gap-2 mt-3">
-        <div id="bet-home" class="odds-btn">🏠 Home (2.5)</div>
-        <div id="bet-draw" class="odds-btn">🤝 Draw (3.2)</div>
-        <div id="bet-away" class="odds-btn">✈️ Away (2.8)</div>
-    </div>
-    <div class="flex gap-2 mt-2">
-        <input type="number" id="bet-amount" placeholder="Amount (ECE)" class="bg-black/50 p-2 rounded w-full text-sm">
-        <button id="place-bet-btn" class="btn-primary px-3 py-1 text-sm">Place Bet</button>
-    </div>
-    <div id="admin-panel" class="mt-3 hidden">
-        <button id="settle-payout" class="bg-blue-600 px-3 py-1 rounded text-sm w-full">💸 Settle & Pay Winner</button>
-    </div>
-</div>
 
-<!-- My Bet -->
-<div class="glass-card">
-    <h3 class="font-bold mb-2">📋 My Bet</h3>
-    <div id="my-bet" class="text-sm">No bet placed yet.</div>
-</div>
+    <!-- Dragon Lord Game -->
+    <div class="glass-card p-5 mb-6">
+        <h2 class="text-2xl font-bold mb-3"><i class="fas fa-dragon"></i> Dragon Lord Game 🐉</h2>
+        <div class="flex flex-wrap gap-4">
+            <div class="flex-1 text-center">
+                <p>Your HP: <span id="player-hp">100</span> | Dragon HP: <span id="dragon-hp">80</span></p>
+                <button id="attack-dragon" class="bg-red-600 px-4 py-2 rounded-full mt-2">⚔️ Attack</button>
+                <button id="heal-player" class="bg-green-600 px-4 py-2 rounded-full mt-2">❤️ Heal (Cost 5 ECE)</button>
+                <div id="dragon-log" class="h-32 overflow-auto text-xs bg-black/30 p-2 rounded mt-2"></div>
+            </div>
+        </div>
+    </div>
 
-<!-- Wallet Modal -->
-<div id="wallet-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden">
-    <div class="glass-card p-6 w-96">
-        <h3 class="text-xl font-bold mb-4">Connect Wallet</h3>
-        <div id="wc-connect" class="wallet-option"><i class="fas fa-qrcode"></i> WalletConnect (recommended)</div>
-        <div id="meta-connect" class="wallet-option"><i class="fab fa-fox"></i> MetaMask (external browser)</div>
-        <button id="close-modal" class="mt-4 bg-gray-700 w-full py-2 rounded">Cancel</button>
-        <p class="text-xs text-gray-400 mt-3">Inside Telegram, use WalletConnect. If you have MetaMask, open this page in your external browser.</p>
+    <!-- Sports Betting + Theme/Country Options -->
+    <div class="glass-card p-5 mb-6">
+        <h2 class="text-2xl font-bold mb-3"><i class="fas fa-futbol"></i> Sports Betting ⚽</h2>
+        <div class="flex flex-wrap gap-4 mb-4">
+            <div><label class="text-sm">Theme:</label><select id="sport-theme" class="bg-black/50 p-1 rounded"><option value="dark">Dark</option><option value="light">Light</option></select></div>
+            <div><label class="text-sm">Country:</label><select id="country-select" class="bg-black/50 p-1 rounded"><option value="Global">Global</option><option value="UK">UK</option><option value="USA">USA</option><option value="Nigeria">Nigeria</option><option value="Spain">Spain</option></select></div>
+        </div>
+        <!-- Live Match Simulator -->
+        <div class="pitch bg-green-800/50 rounded-xl p-3 text-center">
+            <div class="flex justify-between text-2xl font-bold">
+                <span id="home-team">Manchester Utd</span>
+                <span id="match-score">0 - 0</span>
+                <span id="away-team">Liverpool</span>
+            </div>
+            <div class="text-sm">⏱️ <span id="match-time">0:00</span></div>
+            <div id="sport-commentary" class="h-24 overflow-auto text-xs bg-black/30 p-2 rounded mt-2"></div>
+            <div class="flex gap-2 mt-3">
+                <button id="bet-home" class="odds-btn flex-1">🏠 Home (2.5)</button>
+                <button id="bet-draw" class="odds-btn flex-1">🤝 Draw (3.2)</button>
+                <button id="bet-away" class="odds-btn flex-1">✈️ Away (2.8)</button>
+            </div>
+            <div class="flex gap-2 mt-2">
+                <input type="number" id="bet-amount-sport" placeholder="Amount (ECE)" class="bg-black/50 p-2 rounded w-full text-sm">
+                <button id="place-sport-bet" class="btn-primary px-3 py-1 text-sm">Place Bet</button>
+            </div>
+            <div id="sport-bet-status" class="text-xs mt-2"></div>
+        </div>
+    </div>
+
+    <!-- Leaderboard / Stats (optional) -->
+    <div class="glass-card p-4 text-center text-sm">
+        <p>🌍 Global Community Mining Total: <span id="global-mined">0</span> ECE | 🐉 Dragons Slain: <span id="dragons-slain">0</span></p>
     </div>
 </div>
 
 <script>
-    // ---------- CONFIG ----------
-    const TOKEN_ADDRESS = "0x9F8C29E496ECB6C39c221458f211234DfCB233E0";
-    const ADMIN_ADDRESS = "0xC5AD5cfcF81AD63a94227334b898eafCe6B27cCA";
-    const BSC_RPC = "https://bsc-dataseed.binance.org/";
-    const TOKEN_ABI = [{"inputs":[{"internalType":"string","name":"name","type":"string"},{"internalType":"string","name":"symbol","type":"string"},{"internalType":"uint8","name":"decimals","type":"uint8"},{"internalType":"uint256","name":"supply","type":"uint256"},{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"feeWallet","type":"address"},{"internalType":"string","name":"metadata_ipfs_hash","type":"string"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"metadata_ipfs_hash","type":"string"}],"name":"MetadataUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"owner","type":"address"}],"name":"TeamFinanceTokenMint","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"burn","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"burnFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"metadata","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"metadata_ipfs_hash","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"metadata_ipfs_hash","type":"string"}],"name":"updateMetadata","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+    // ---------- GLOBAL STATE (localStorage) ----------
+    let eceMined = parseFloat(localStorage.getItem("eceMined") || "0");
+    let btcMined = parseFloat(localStorage.getItem("btcMined") || "0");
+    let usdtMined = parseFloat(localStorage.getItem("usdtMined") || "0");
+    let ecePower = parseInt(localStorage.getItem("ecePower") || "1");
+    let btcPower = parseInt(localStorage.getItem("btcPower") || "1");
+    let usdtPower = parseInt(localStorage.getItem("usdtPower") || "1");
+    let playerHP = parseInt(localStorage.getItem("playerHP") || "100");
+    let dragonHP = parseInt(localStorage.getItem("dragonHP") || "80");
+    let dragonsSlain = parseInt(localStorage.getItem("dragonsSlain") || "0");
+    let globalMined = parseInt(localStorage.getItem("globalMined") || "0");
     
-    let provider, tokenContract, signer, userAddress = null, userBalance = 0;
-    let web3Modal, walletConnectProvider;
-    let match = {
-        home: "Manchester Utd", away: "Liverpool",
-        homeScore: 0, awayScore: 0,
-        oddsHome: 2.5, oddsDraw: 3.2, oddsAway: 2.8,
-        status: "in_progress", // always live
-        minute: 0,
-        winner: null
-    };
-    let userBet = null;
+    // Sports betting variables
+    let matchActive = true;
+    let matchMinute = 0;
+    let homeScore = 0, awayScore = 0;
     let matchInterval = null;
+    let currentBet = null; // { outcome, amount }
     
-    // Telegram WebApp
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.ready();
-    const user = tg.initDataUnsafe?.user;
-    if(user) document.getElementById("telegram-user").innerHTML = `<i class="fab fa-telegram"></i> ${user.first_name}`;
-    
-    function setLoading(show, text = "Processing...") {
-        const loader = document.getElementById("loading");
-        const p = loader.querySelector("div");
-        if(p) p.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${text}`;
-        loader.classList.toggle("hidden", !show);
+    // Helper UI updates
+    function updateUI() {
+        document.getElementById("ece-mined").innerText = eceMined.toFixed(2);
+        document.getElementById("btc-mined").innerText = btcMined.toFixed(8);
+        document.getElementById("usdt-mined").innerText = usdtMined.toFixed(2);
+        document.getElementById("ece-power").innerText = ecePower;
+        document.getElementById("btc-power").innerText = btcPower;
+        document.getElementById("usdt-power").innerText = usdtPower;
+        document.getElementById("player-hp").innerText = playerHP;
+        document.getElementById("dragon-hp").innerText = dragonHP;
+        document.getElementById("dragons-slain").innerText = dragonsSlain;
+        document.getElementById("global-mined").innerText = globalMined;
+        localStorage.setItem("eceMined", eceMined);
+        localStorage.setItem("btcMined", btcMined);
+        localStorage.setItem("usdtMined", usdtMined);
+        localStorage.setItem("ecePower", ecePower);
+        localStorage.setItem("btcPower", btcPower);
+        localStorage.setItem("usdtPower", usdtPower);
+        localStorage.setItem("playerHP", playerHP);
+        localStorage.setItem("dragonHP", dragonHP);
+        localStorage.setItem("dragonsSlain", dragonsSlain);
+        localStorage.setItem("globalMined", globalMined);
     }
     
-    async function updateBalance() {
-        if(userAddress && tokenContract) {
-            try {
-                const bal = await tokenContract.balanceOf(userAddress);
-                userBalance = parseFloat(ethers.utils.formatUnits(bal, 18));
-                document.getElementById("ece-balance").innerText = userBalance.toFixed(2);
-            } catch(e) { console.error(e); }
-        }
-    }
-    
-    // WalletConnect connection (works inside Telegram)
-    async function connectWalletConnect() {
-        setLoading(true, "Opening WalletConnect...");
-        try {
-            const projectId = "b56e18d99c7dd5bcf5b87b5c7942d9d8";
-            walletConnectProvider = await WalletConnectModal.init({
-                projectId: projectId,
-                chains: [56],
-                methods: ["eth_sendTransaction", "eth_sign"],
-                showQrModal: true
-            });
-            await walletConnectProvider.connect();
-            const web3Provider = new ethers.providers.Web3Provider(walletConnectProvider);
-            signer = web3Provider.getSigner();
-            userAddress = await signer.getAddress();
-            provider = new ethers.providers.JsonRpcProvider(BSC_RPC);
-            tokenContract = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, provider);
-            await updateBalance();
-            document.getElementById("wallet-address").innerText = userAddress.slice(0,8)+"...";
-            document.getElementById("wallet-modal").classList.add("hidden");
-            tg.showPopup({ title: "Connected", message: `Wallet: ${userAddress.slice(0,10)}...`, buttons: [{type:"ok"}] });
-            if(userAddress.toLowerCase() === ADMIN_ADDRESS.toLowerCase()) {
-                document.getElementById("admin-panel").classList.remove("hidden");
-            }
-        } catch(e) {
-            document.getElementById("conn-error").innerText = "WalletConnect failed: " + e.message;
-            document.getElementById("conn-error").classList.remove("hidden");
-        } finally {
-            setLoading(false);
-        }
-    }
-    
-    // MetaMask (only works in external browser, but we provide a button to open externally)
-    async function connectMetaMask() {
-        if(window.ethereum) {
-            setLoading(true, "Connecting MetaMask...");
-            try {
-                const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
-                await window.ethereum.request({ method: "eth_requestAccounts" });
-                signer = web3Provider.getSigner();
-                userAddress = await signer.getAddress();
-                provider = new ethers.providers.JsonRpcProvider(BSC_RPC);
-                tokenContract = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, provider);
-                await updateBalance();
-                document.getElementById("wallet-address").innerText = userAddress.slice(0,8)+"...";
-                document.getElementById("wallet-modal").classList.add("hidden");
-                if(userAddress.toLowerCase() === ADMIN_ADDRESS.toLowerCase()) {
-                    document.getElementById("admin-panel").classList.remove("hidden");
-                }
-            } catch(e) {
-                document.getElementById("conn-error").innerText = "MetaMask: " + e.message;
-                document.getElementById("conn-error").classList.remove("hidden");
-            } finally { setLoading(false); }
-        } else {
-            // No MetaMask: offer to open in external browser
-            if(confirm("MetaMask not detected. Open this page in your external browser to use MetaMask?")) {
-                window.open(window.location.href, "_blank");
-            }
-        }
-    }
-    
-    // Show wallet modal
-    document.getElementById("connect-wallet-btn").onclick = () => {
-        document.getElementById("wallet-modal").classList.remove("hidden");
+    // Mining actions
+    document.getElementById("mine-ece").onclick = () => {
+        eceMined += ecePower;
+        globalMined += ecePower;
+        updateUI();
     };
-    document.getElementById("wc-connect").onclick = () => connectWalletConnect();
-    document.getElementById("meta-connect").onclick = () => connectMetaMask();
-    document.getElementById("close-modal").onclick = () => document.getElementById("wallet-modal").classList.add("hidden");
+    document.getElementById("mine-btc").onclick = () => {
+        let gain = 0.0001 * btcPower;
+        btcMined += gain;
+        updateUI();
+    };
+    document.getElementById("mine-usdt").onclick = () => {
+        usdtMined += usdtPower;
+        globalMined += usdtPower;
+        updateUI();
+    };
+    document.getElementById("upgrade-ece").onclick = () => {
+        if(eceMined >= 10) {
+            eceMined -= 10;
+            ecePower++;
+            updateUI();
+        } else alert("Need 10 ECE");
+    };
+    document.getElementById("upgrade-btc").onclick = () => {
+        let cost = 0.001;
+        if(btcMined >= cost) {
+            btcMined -= cost;
+            btcPower++;
+            updateUI();
+        } else alert("Need 0.001 BTC");
+    };
+    document.getElementById("upgrade-usdt").onclick = () => {
+        if(usdtMined >= 10) {
+            usdtMined -= 10;
+            usdtPower++;
+            updateUI();
+        } else alert("Need 10 USDT");
+    };
     
-    // Place bet
-    async function placeBet(outcome, odds) {
-        if(!userAddress) { tg.showPopup({ title: "Error", message: "Connect wallet first", buttons: [{type:"ok"}] }); return; }
-        if(match.status !== "in_progress") { tg.showPopup({ title: "Error", message: "Match not in progress", buttons: [{type:"ok"}] }); return; }
-        const amount = parseFloat(document.getElementById("bet-amount").value);
-        if(isNaN(amount) || amount <= 0) { tg.showPopup({ title: "Error", message: "Enter valid amount", buttons: [{type:"ok"}] }); return; }
-        if(amount > userBalance) { tg.showPopup({ title: "Error", message: "Insufficient balance", buttons: [{type:"ok"}] }); return; }
-        setLoading(true, "Approving & placing bet...");
-        try {
-            const amountWei = ethers.utils.parseUnits(amount.toString(), 18);
-            const tokenWithSigner = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, signer);
-            const approveTx = await tokenWithSigner.approve(ADMIN_ADDRESS, amountWei);
-            await approveTx.wait();
-            const transferTx = await tokenWithSigner.transfer(ADMIN_ADDRESS, amountWei);
-            await transferTx.wait();
-            userBet = { outcome, amount, odds };
-            localStorage.setItem("tg_bet", JSON.stringify(userBet));
-            document.getElementById("my-bet").innerHTML = `🎲 Bet: ${amount} ECE on ${outcome} (odds ${odds})<br>⏳ Status: Pending`;
-            tg.showPopup({ title: "Bet Placed", message: `${amount} ECE on ${outcome}`, buttons: [{type:"ok"}] });
-        } catch(e) { alert("Error: "+e.message); }
-        finally { setLoading(false); }
+    // Dragon game
+    function addDragonLog(msg) {
+        const log = document.getElementById("dragon-log");
+        const p = document.createElement("p");
+        p.innerText = msg;
+        log.appendChild(p);
+        log.scrollTop = log.scrollHeight;
+        if(log.children.length > 20) log.removeChild(log.children[0]);
     }
+    document.getElementById("attack-dragon").onclick = () => {
+        if(playerHP <= 0) { addDragonLog("You are dead! Heal or reset."); return; }
+        if(dragonHP <= 0) { addDragonLog("Dragon already dead. A new dragon appears!"); dragonHP = 80 + Math.floor(Math.random() * 50); updateUI(); addDragonLog("New dragon with " + dragonHP + " HP appears!"); return; }
+        let playerDamage = Math.floor(Math.random() * 20) + 10;
+        let dragonDamage = Math.floor(Math.random() * 15) + 5;
+        dragonHP -= playerDamage;
+        playerHP -= dragonDamage;
+        addDragonLog(`You hit for ${playerDamage}! Dragon hits back for ${dragonDamage}.`);
+        if(dragonHP <= 0) {
+            addDragonLog("🎉 You slayed the dragon! +50 ECE reward!");
+            eceMined += 50;
+            dragonsSlain++;
+            dragonHP = 80 + Math.floor(Math.random() * 50);
+            playerHP = Math.min(playerHP + 30, 100);
+            updateUI();
+            addDragonLog(`New dragon appears! HP: ${dragonHP}`);
+        }
+        if(playerHP <= 0) {
+            addDragonLog("💀 You died! Use Heal to revive.");
+            playerHP = 0;
+        }
+        updateUI();
+    };
+    document.getElementById("heal-player").onclick = () => {
+        if(eceMined >= 5 && playerHP < 100) {
+            eceMined -= 5;
+            playerHP = Math.min(playerHP + 40, 100);
+            updateUI();
+            addDragonLog("You healed 40 HP!");
+        } else if(playerHP >= 100) alert("Already full HP");
+        else alert("Need 5 ECE to heal");
+    };
     
-    document.getElementById("bet-home").onclick = () => placeBet("home", match.oddsHome);
-    document.getElementById("bet-draw").onclick = () => placeBet("draw", match.oddsDraw);
-    document.getElementById("bet-away").onclick = () => placeBet("away", match.oddsAway);
-    
-    // Live match simulation (auto-starts and runs for 90 seconds)
+    // Sports betting simulation (live match)
     function startMatchSimulation() {
-        match.status = "in_progress";
-        match.minute = 0;
-        match.homeScore = 0;
-        match.awayScore = 0;
-        const commentaryDiv = document.getElementById("commentary");
-        commentaryDiv.innerHTML = "<p>⚽ Kick-off! Match is live.</p>";
         if(matchInterval) clearInterval(matchInterval);
+        matchMinute = 0;
+        homeScore = 0;
+        awayScore = 0;
+        document.getElementById("match-score").innerText = "0 - 0";
+        document.getElementById("match-time").innerText = "0:00";
+        const commentaryDiv = document.getElementById("sport-commentary");
+        commentaryDiv.innerHTML = "<p>⚽ Match started!</p>";
         matchInterval = setInterval(() => {
-            if(match.status !== "in_progress") return;
-            match.minute++;
-            document.getElementById("time").innerText = `${Math.floor(match.minute/2)}:${(match.minute%2)*30}`;
-            // Random goal ~10% chance per minute
+            if(!matchActive) return;
+            matchMinute++;
+            document.getElementById("match-time").innerText = `${Math.floor(matchMinute/2)}:${(matchMinute%2)*30}`;
             if(Math.random() < 0.12) {
-                const scoring = Math.random() < 0.5 ? "home" : "away";
+                let scoring = Math.random() < 0.5 ? "home" : "away";
                 if(scoring === "home") {
-                    match.homeScore++;
-                    addCommentary(`⚽ GOAL! ${match.home} scores! (${match.homeScore} - ${match.awayScore})`);
+                    homeScore++;
+                    addSportCommentary(`⚽ GOAL! Manchester Utd scores! (${homeScore} - ${awayScore})`);
                 } else {
-                    match.awayScore++;
-                    addCommentary(`⚽ GOAL! ${match.away} scores! (${match.homeScore} - ${match.awayScore})`);
+                    awayScore++;
+                    addSportCommentary(`⚽ GOAL! Liverpool scores! (${homeScore} - ${awayScore})`);
                 }
-                document.getElementById("score").innerText = `${match.homeScore} - ${match.awayScore}`;
+                document.getElementById("match-score").innerText = `${homeScore} - ${awayScore}`;
             }
-            if(match.minute >= 90) {
+            if(matchMinute >= 90) {
                 clearInterval(matchInterval);
-                match.status = "finished";
-                if(match.homeScore > match.awayScore) match.winner = "home";
-                else if(match.homeScore < match.awayScore) match.winner = "away";
-                else match.winner = "draw";
-                addCommentary(`🏁 Full time! Result: ${match.homeScore} - ${match.awayScore}. Winner: ${match.winner === "home" ? match.home : (match.winner === "away" ? match.away : "Draw")}`);
-                if(userBet && userBet.outcome === match.winner) {
-                    addCommentary(`🎉 You won! Admin will pay you soon.`);
+                matchActive = false;
+                let winner = homeScore > awayScore ? "home" : (homeScore < awayScore ? "away" : "draw");
+                addSportCommentary(`🏁 Full time! Result: ${homeScore} - ${awayScore}. Winner: ${winner === "home" ? "Manchester Utd" : (winner === "away" ? "Liverpool" : "Draw")}`);
+                if(currentBet && currentBet.outcome === winner) {
+                    let winAmount = currentBet.amount * (winner === "home" ? 2.5 : (winner === "away" ? 2.8 : 3.2));
+                    addSportCommentary(`🎉 You won ${winAmount.toFixed(2)} ECE!`);
+                    eceMined += winAmount;
+                    updateUI();
+                    document.getElementById("sport-bet-status").innerHTML = `<span class="text-green-400">You won ${winAmount.toFixed(2)} ECE!</span>`;
+                } else if(currentBet) {
+                    document.getElementById("sport-bet-status").innerHTML = `<span class="text-red-400">You lost. Better luck next match!</span>`;
                 }
-                document.getElementById("match-status").innerText = "FINISHED";
+                currentBet = null;
+                // auto restart match after 10 seconds
+                setTimeout(() => { matchActive = true; startMatchSimulation(); }, 10000);
+                addSportCommentary("New match will start in 10 seconds...");
             }
         }, 1000);
     }
-    
-    function addCommentary(msg) {
-        const box = document.getElementById("commentary");
+    function addSportCommentary(msg) {
+        const box = document.getElementById("sport-commentary");
         const p = document.createElement("p");
-        p.innerHTML = msg;
+        p.innerText = msg;
         box.appendChild(p);
         box.scrollTop = box.scrollHeight;
         if(box.children.length > 15) box.removeChild(box.children[0]);
     }
     
-    // Admin settle payout
-    async function settlePayout() {
-        if(userAddress?.toLowerCase() !== ADMIN_ADDRESS.toLowerCase()) {
-            tg.showPopup({ title: "Error", message: "Only admin can settle", buttons: [{type:"ok"}] });
-            return;
-        }
-        if(match.status !== "finished") {
-            tg.showPopup({ title: "Error", message: "Match not finished yet", buttons: [{type:"ok"}] });
-            return;
-        }
-        if(!userBet) {
-            tg.showPopup({ title: "Info", message: "No bets placed", buttons: [{type:"ok"}] });
-            return;
-        }
-        if(userBet.outcome !== match.winner) {
-            tg.showPopup({ title: "Info", message: "User did not win", buttons: [{type:"ok"}] });
-            return;
-        }
-        const winAmount = userBet.amount * userBet.odds;
-        setLoading(true, "Paying winner...");
-        try {
-            const tokenWithSigner = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, signer);
-            const winWei = ethers.utils.parseUnits(winAmount.toFixed(18), 18);
-            await tokenWithSigner.transfer(userAddress, winWei);
-            document.getElementById("my-bet").innerHTML = `🎉 You won! Received ${winAmount.toFixed(2)} ECE.`;
-            userBet = null;
-            localStorage.removeItem("tg_bet");
-            tg.showPopup({ title: "Paid", message: `${winAmount.toFixed(2)} ECE sent`, buttons: [{type:"ok"}] });
-        } catch(e) { alert("Payout error: "+e.message); }
-        finally { setLoading(false); }
+    // Place bet (uses ECE from mining)
+    document.getElementById("place-sport-bet").onclick = () => {
+        if(!matchActive) { alert("Match not active, wait for next match."); return; }
+        let amount = parseFloat(document.getElementById("bet-amount-sport").value);
+        if(isNaN(amount) || amount <= 0) { alert("Enter valid amount"); return; }
+        let outcome = null;
+        let odds = 0;
+        if(document.activeElement && document.activeElement.id === "bet-home") outcome = "home";
+        else if(document.activeElement && document.activeElement.id === "bet-draw") outcome = "draw";
+        else if(document.activeElement && document.activeElement.id === "bet-away") outcome = "away";
+        else { alert("Click on Home, Draw, or Away button first"); return; }
+        odds = outcome === "home" ? 2.5 : (outcome === "draw" ? 3.2 : 2.8);
+        if(amount > eceMined) { alert("Insufficient ECE balance. Mine more!"); return; }
+        eceMined -= amount;
+        currentBet = { outcome, amount, odds };
+        updateUI();
+        document.getElementById("sport-bet-status").innerHTML = `Bet placed: ${amount} ECE on ${outcome} at odds ${odds}`;
+        addSportCommentary(`Bet placed: ${amount} ECE on ${outcome}`);
+    };
+    document.getElementById("bet-home").onclick = () => { document.getElementById("place-sport-bet").click(); };
+    document.getElementById("bet-draw").onclick = () => { document.getElementById("place-sport-bet").click(); };
+    document.getElementById("bet-away").onclick = () => { document.getElementById("place-sport-bet").click(); };
+    
+    // Theme switcher (light/dark)
+    document.getElementById("theme-toggle").onclick = () => {
+        document.body.classList.toggle("light-theme");
+    };
+    // Country selector (just UI placeholder)
+    document.getElementById("country-select").onchange = (e) => {
+        addSportCommentary(`🌍 Country changed to ${e.target.value}. Localized sports coming soon!`);
+    };
+    // Theme selector for sports
+    document.getElementById("sport-theme").onchange = (e) => {
+        addSportCommentary(`🎨 Sports theme set to ${e.target.value}`);
+    };
+    
+    // Referral link generation (using wallet address if available, else guest ID)
+    let userId = localStorage.getItem("userId");
+    if(!userId) { userId = "guest_" + Math.random().toString(36).substr(2, 8); localStorage.setItem("userId", userId); }
+    let refLink = `${window.location.origin}${window.location.pathname}?ref=${userId}`;
+    document.getElementById("referral-link").innerText = refLink;
+    document.getElementById("copy-ref").onclick = () => { navigator.clipboard.writeText(refLink); alert("Referral link copied!"); };
+    // If URL has ref param, simulate referral reward
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get("ref");
+    if(ref && ref !== userId) {
+        alert(`Welcome! You were referred by ${ref}. You both get 10 ECE bonus!`);
+        eceMined += 10;
+        updateUI();
+        // track referral (simplified)
+        localStorage.setItem("referred_by", ref);
     }
     
-    document.getElementById("settle-payout").onclick = settlePayout;
-    
-    // Load stored bet
-    const savedBet = localStorage.getItem("tg_bet");
-    if(savedBet) {
-        try { userBet = JSON.parse(savedBet); document.getElementById("my-bet").innerHTML = `🎲 Bet: ${userBet.amount} ECE on ${userBet.outcome}<br>⏳ Status: Pending`; } catch(e) {}
-    }
-    
-    // Start the live match immediately
+    // Start sports match
     startMatchSimulation();
+    updateUI();
     
-    // Telegram theme
-    tg.setBackgroundColor("#0a0f1e");
-    tg.setHeaderColor("bg_color");
+    // Google Translate
+    window.googleTranslateElementInit = () => {
+        new google.translate.TranslateElement({ pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE }, 'google_translate_element');
+    };
+    
+    // Set user name from Telegram if available (optional)
+    if(window.Telegram?.WebApp?.initDataUnsafe?.user) {
+        document.getElementById("user-name").innerText = window.Telegram.WebApp.initDataUnsafe.user.first_name;
+    } else {
+        document.getElementById("user-name").innerText = "Explorer";
+    }
 </script>
 </body>
 </html>
